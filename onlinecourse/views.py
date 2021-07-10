@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.views import generic
 
-from .models import Course, Enrollment
+from .models import Course, Enrollment, Submission
 from . import utils
 
 
@@ -107,4 +107,25 @@ def enroll(request, course_id):
     return HttpResponseRedirect(reverse(
         viewname='onlinecourse:course_details',
         args=(course.id,)
+    ))
+
+
+def submit(request, course_id):
+    course = get_object_or_404(Course, pk=course_id)
+    user = request.user
+
+    is_enrolled = utils.check_if_enrolled(user, course)
+    if not is_enrolled and user.is_authenticated:
+        enrollment = Enrollment.objects.get(user=user, course=course)
+        submission = Submission.objects.create(enrollment=enrollment)
+
+        submitted_answers = [
+            int(value)
+            for key, value in request.POST.items()
+            if key.startswith('choice')
+        ]
+        submission.choices.add(*submitted_answers)
+
+    return HttpResponseRedirect(reverse(
+        viewname='onlinecourse:index',
     ))

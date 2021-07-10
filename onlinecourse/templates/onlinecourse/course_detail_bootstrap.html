@@ -25,7 +25,7 @@
         {% if user.is_authenticated %}
             <button class="btn btn-primary btn-block" data-toggle="collapse" data-target="#exam">Start Exam</button>
             <div id="exam" class="collapse">
-                <form id="questionform" action="" method="post">
+                <form id="questionform" action="{% url 'onlinecourse:submit' course.id %}" method="post">
                     {% for question in course.question_set.all %}
                     <div class="card mt-1">
                         <div class="card-header"><h5>{{ question.text}}</h5></div>
