@@ -13,7 +13,7 @@
                             <h5 class="card-title">{{ course.name }}, <span class="text-success">
                                 {{ course.total_enrollment}} enrolled</span></h5>
                         <p class="card-text">{{ course.description}}</p>
-                        <form action="" method="post">
+                        <form action="{% url 'onlinecourse:enroll' course.id %}" method="post">
                                 {% csrf_token %}
                                 <input class="btn btn-primary"  type="submit"
                                         value="{% if course.is_enrolled %}Enter{% else %}Enroll{% endif %} ">
