@@ -98,16 +98,19 @@ def enroll(request, course_id):
     user = request.user
 
     is_enrolled = utils.check_if_enrolled(user, course)
-    if not is_enrolled and user.is_authenticated:
-        # Create an enrollment
-        Enrollment.objects.create(user=user, course=course, mode='honor')
-        course.total_enrollment += 1
-        course.save()
+    if user.is_authenticated:
+        if not is_enrolled:
+            # Create an enrollment
+            Enrollment.objects.create(user=user, course=course, mode='honor')
+            course.total_enrollment += 1
+            course.save()
 
-    return HttpResponseRedirect(reverse(
-        viewname='onlinecourse:course_details',
-        args=(course.id,)
-    ))
+        return HttpResponseRedirect(reverse(
+            viewname='onlinecourse:course_details',
+            args=(course.id,)
+        ))
+
+    return redirect('onlinecourse:login')
 
 
 def submit(request, course_id):
