@@ -118,17 +118,50 @@ def submit(request, course_id):
     user = request.user
 
     is_enrolled = utils.check_if_enrolled(user, course)
-    if not is_enrolled and user.is_authenticated:
-        enrollment = Enrollment.objects.get(user=user, course=course)
-        submission = Submission.objects.create(enrollment=enrollment)
+    if user.is_authenticated:
+        if is_enrolled:
+            enrollment = Enrollment.objects.get(user=user, course=course)
+            submission = Submission.objects.create(enrollment=enrollment)
 
-        submitted_answers = [
-            int(value)
-            for key, value in request.POST.items()
-            if key.startswith('choice')
-        ]
-        submission.choices.add(*submitted_answers)
+            submitted_answers = [
+                int(value)
+                for key, value in request.POST.items()
+                if key.startswith('choice')
+            ]
+            submission.choices.add(*submitted_answers)
 
-    return HttpResponseRedirect(reverse(
-        viewname='onlinecourse:index',
-    ))
+            return HttpResponseRedirect(reverse(
+                viewname='onlinecourse:show_exam_result',
+                args=(course.id, submission.id,)
+            ))
+
+        return HttpResponseRedirect(reverse(
+            viewname='onlinecourse:enroll',
+            args=(course.id,)
+        ))
+
+    return redirect('onlinecourse:login')
+
+
+def show_exam_result(request, course_id, submission_id):
+    course = get_object_or_404(Course, pk=course_id)
+    submission = get_object_or_404(Submission, pk=submission_id)
+    choices = submission.choices.all()
+
+    total_score, score = 0, 0
+    for choice in choices:
+        total_score += choice.question.grade
+        if choice.is_correct:
+            score += choice.question.grade
+
+    context = {
+        "course": course,
+        "choices": choices,
+        "grade": (score / total_score * 100),
+    }
+
+    return render(
+        request,
+        'onlinecourse/exam_result_bootstrap.html',
+        context
+    )
