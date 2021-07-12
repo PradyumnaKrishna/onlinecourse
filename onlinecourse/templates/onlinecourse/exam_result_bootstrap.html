@@ -4,11 +4,11 @@
 <div class="container-fluid">
     {% if grade > 80 %}
         <div class="alert alert-success">
-        <strong>Failed</strong> Sorry, {{ user.first_name }}! You have failed the exam with score {{ grade }} / 100
+            <strong>Congratulation, {{ user.first_name }}!</strong> You have passed the exam and completed the course with score {{ grade }} / 100
         </div>
     {% else %}
         <div class="alert alert-danger">
-            <strong>Congratulation, {{ user.first_name }}!</strong> You have passed the exam and completed the course with score {{ grade }} / 100
+            <strong>Failed</strong> Sorry, {{ user.first_name }}! You have failed the exam with score {{ grade }} / 100
         </div>
         <a class="btn btn-link text-danger" href="{% url 'onlinecourse:course_details' course.id %}">Re-test</a>
     {% endif %}
@@ -24,10 +24,14 @@
                 {% csrf_token %}
                 <div class="card-body">
                     {% for choice in question.choice_set.all %}
-                        {% if choice.is_correct %}
+                        {% if choice in choices and choice.is_correct %}
                             <p class="text-success">Correct answer: {{ choice.text }}</p>
-                        {% else %}
+                        {% elif choice in choices and not choice.is_correct %}
                             <p class="text-danger">Incorrect answer: {{ choice.text }}</p>
+                        {% elif not choice in choices and choice.is_correct %}
+                            <p class="text-warning">Not selected: {{ choice.text }}</p>
+                        {% else %}
+                            <p class="text-dark">{{ choice.text }}</p>
                         {% endif %}
                     {% endfor %}
                 </div>
