@@ -115,9 +115,7 @@ class Question(models.Model):
             id__in=selected_ids
         ).count()
 
-        if all_answers == selected_correct:
-            return True
-        return False
+        return all_answers == selected_correct
 
 
 # Choice model

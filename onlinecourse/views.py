@@ -149,15 +149,15 @@ def show_exam_result(request, course_id, submission_id):
     choices = submission.choices.all()
 
     total_score, score = 0, 0
-    for choice in choices:
-        total_score += choice.question.grade
-        if choice.is_correct:
-            score += choice.question.grade
+    for question in course.question_set.all():
+        total_score += question.grade
+        if question.is_get_score(choices):
+            score += question.grade
 
     context = {
         "course": course,
         "choices": choices,
-        "grade": (score / total_score * 100),
+        "grade": int(score / total_score * 100),
     }
 
     return render(
